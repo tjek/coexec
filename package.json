@@ -8,6 +8,8 @@
     "await",
     "generator",
     "flow",
+    "control flow",
+    "fault tolerance",
     "retry",
     "throttle",
     "pool",
