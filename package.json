@@ -1,0 +1,37 @@
+{
+  "name": "co-executioner",
+  "version": "0.0.1",
+  "description": "Wrap around/manage/throttle/pool yieldables",
+  "main": "index.js",
+  "keywords": [
+    "async",
+    "await",
+    "generator",
+    "flow",
+    "retry",
+    "throttle",
+    "pool",
+    "pooling",
+    "coro",
+    "coroutine",
+    "es6"
+  ],
+  "devDependencies": {
+    "mocha": "^4.0.0",
+    "nyc": "^11.3.0"
+  },
+  "scripts": {
+    "test": "mocha",
+    "coveralls": "nyc report --reporter=text-lcov"
+  },
+  "dependencies": {},
+  "author": "Iasonas Zotos <iz@shopgun.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://githu.com/shopgun/coexec.git"
+  },
+  "engines": {
+    "node": ">=8"
+  }
+}
