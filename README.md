@@ -1,5 +1,6 @@
 # Co-Executioner
-[![Build status][travis-image]][travis-url]
+[![Build Status](https://travis-ci.org/shopgun/coexec.svg?branch=master)](https://travis-ci.org/shopgun/coexec)
+
 Co-Executioner wraps around generator functions managing execution to regulate heavy tasks by providing multi-level, configurable pooling and retry strategies, while allowing for inline non-blocking code.
 
 ## Install
