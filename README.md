@@ -90,6 +90,29 @@ Configuration parameters:
 * `retries`: Number of retries before rejecting.
 * `retryInterval`: Time to wait between failure and retry in ms.
 
+## Configuration
+Executioners and Tasks are configurable. For the shared parameters: `Default Executioner configuration < Executioner < Task`
+
+Executioner configuration [`default values`]:
+```js
+name: String                 // Name of the executioner ['default']
+retries: Number              // Number of retries before failure [1]
+retryInterval: Number        // Interval between failure and start of retry in ms [200]
+cores: Number                // Task pool size [1]
+threads: Number              // Maximum threads per Process [1]
+silent: Boolean              // Mute logging [false]
+pooling: Boolean             // Keep pool of active tasks, throttle execution to those [true]
+log: Function                // Custom log function, use with silent set to false
+```
+Task configuration
+```js
+name: String                 // Name of the task ['<anon>']
+retries: Number              // Number of retries before failure
+retryInterval: Number        // Interval between failure and start of retry in ms
+threads: Number              // Maximum threads
+heavy: Boolean               // If set to true, no other tasks will cycle while this Process is running
+```
+
 ## Templates
 
 Co-Executioner comes with a set of templates to accommodate common usage patterns.
@@ -104,7 +127,7 @@ You can easily access them as such:
 ### functor([fns])
 `functor` takes in an array of functions that may return yieldables. The result of the functions is returned in an ordered array. The functor allows for threading, so the functions will be pooled and run in order and on demand. For example, if you have 2 threads and pass 10 functions to the functor, it will first execute 2 of them, and if they return a yieldable it will wait for it to resolve before executing the next function in the array.
 
-### callback(function(err, data){}) [alias:promisify]
+### callback(function(cb){}) [alias:promisify]
 `callback` (or `promisify`) takes in a node-style callback function and returns a yieldable. It will throw an error in case of non-null err.
 
 ### spawn(config, function*) [alias:promisify]
