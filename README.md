@@ -9,6 +9,12 @@ Co-Executioner wraps around generator functions managing execution to regulate h
 $ npm install co-executioner
 ```
 
+## Tests
+
+```
+$ mocha
+```
+
 ## Usage
 
 Create an executioner
