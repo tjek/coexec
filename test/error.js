@@ -8,10 +8,11 @@
 
 const Executioner = require('../.');
 const { Task } = Executioner;
+const { functor } = Executioner.Templates;
 const assert = require('assert');
 
 const execNoRetry = new Executioner({
-    name: 'executor',
+    name: 'no-retry',
     silent: true,
     threads: 1,
     cores: 1,
@@ -19,7 +20,7 @@ const execNoRetry = new Executioner({
 });
 
 const execRetry = new Executioner({
-    name: 'executor',
+    name: 'retry',
     silent: true,
     threads: 1,
     cores: 1,
@@ -60,6 +61,17 @@ const errAccum = promises => {
     });
 };
 
+const nestedError = new Task(function* () {
+    arr = yield functor([() => new Task({ executioner: execRetry }, function* () {
+        yield new Task({ executioner: execNoRetry }, function* () {
+            p = new Promise((resolve, reject) => {
+                resolve(nestTask(failGenThrow('supererr')));
+            });
+            yield p;
+        });
+    })]);
+});
+
 describe('Executioner', () => {
     describe('Errors', () => {
         it('should catch and return top-level errors', () => {
@@ -78,24 +90,34 @@ describe('Executioner', () => {
                     assert.equal(errors[3][0].message, 'Error: 20');
                 }).catch(assert.fail);
         });
-        it('should retry proper amount of tries', () =>
-            execRetry.execute(failGenYield(10))
+        it('should retry proper amount of tries', () => {
+            return execRetry.execute(failGenYield(10))
                 .then(assert.fail)
                 .catch((errors) => {
                     assert.equal(errors.length, 1 + 10);
                     errors.map(err => assert.equal(err.message, 10));
                 })
-        );
-        it('should handle succeed after fail', () =>
-            execRetry.execute(failAndSucceed(11))
+        });
+        it('should handle succeed after fail', () => {
+            return execRetry.execute(failAndSucceed(11))
                 .then(data => assert.equal(data, true)).catch(assert.fail)
-        );
+        });
         it('should not succeed without enough retries', () => {
-            execRetry.execute(failAndSucceed(12))
+            return execRetry.execute(failAndSucceed(12))
                 .then(assert.fail)
                 .catch(errors => {
                     assert.equal(errors.length, 1 + 10);
                     errors.map(err => assert.equal(err.message, 'err'));
+                });
+        });
+    });
+    describe('Nested Errors', () => {
+        it('should catch errors from nested tasks', function (done) {
+            execNoRetry.execute(nestedError)
+                .then(() => {
+                    done(new Error('should have failed'));
+                }).catch(errors => {
+                    done()
                 });
         });
     });
