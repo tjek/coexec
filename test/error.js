@@ -62,14 +62,9 @@ const errAccum = promises => {
 };
 
 const nestedError = new Task(function* () {
-    arr = yield functor([() => new Task({ executioner: execRetry }, function* () {
-        yield new Task({ executioner: execNoRetry }, function* () {
-            p = new Promise((resolve, reject) => {
-                resolve(nestTask(failGenThrow('supererr')));
-            });
-            yield p;
-        });
-    })]);
+    yield function* _nest() {
+        data = yield [function* () { yield failGenYield('nested error'); }];
+    };
 });
 
 describe('Executioner', () => {
@@ -86,8 +81,8 @@ describe('Executioner', () => {
                     assert.equal(errors[0][0].message, 5);
                     assert.equal(errors[1][0].message, 10);
                     // Errors coming from tasks are arrays of errors (because of retries)
-                    assert.equal(errors[2][0].message, 'Error: 15');
-                    assert.equal(errors[3][0].message, 'Error: 20');
+                    assert.equal(errors[2][0][0].message, 15);
+                    assert.equal(errors[3][0][0].message, 20);
                 }).catch(assert.fail);
         });
         it('should retry proper amount of tries', () => {
@@ -113,8 +108,8 @@ describe('Executioner', () => {
     });
     describe('Nested Errors', () => {
         it('should catch errors from nested tasks', function (done) {
-            execNoRetry.execute(nestedError)
-                .then(() => {
+            execRetry.execute(nestedError)
+                .then((data) => {
                     done(new Error('should have failed'));
                 }).catch(errors => {
                     done()
