@@ -70,13 +70,27 @@ const errAccum = promises => {
     });
 };
 
+function* nest(err) {
+    throw new Error(err);
+};
+
+const nestedGenerator = new Task(function* () {
+    yield [nest('nested generator error')];
+});
+
 const nestedError = new Task(function* () {
     data = yield [function* nested() { yield new Error('nested'); }];
 });
 
 const deepNestedError = new Task(function* () {
     yield function* _nest() {
-        data = yield [function* () { yield failGenYield('nested error'); }, function* () { yield failGenYield('nested error'); }];
+        data = yield [function* () { yield failGenYield('deep nested'); }];
+    };
+});
+
+const deeperNestedError = new Task(function* () {
+    yield function* _nest() {
+        data = yield [function* () { yield new Task(function* () { yield [failGenThrow('deeper nested')]; }); }];
     };
 });
 
@@ -108,7 +122,7 @@ describe('Executioner', () => {
         });
         it('should handle succeed after fail', () => {
             return execRetry.execute(failAndSucceed(11))
-                .then(data => assert.equal(data, true)).catch(assert.fail)
+                .then(data => assert.equal(data, true)).catch(assert.fail);
         });
         it('should not succeed without enough retries', () => {
             return execRetry.execute(failAndSucceed(12))
@@ -120,25 +134,46 @@ describe('Executioner', () => {
         });
     });
     describe('Nested Errors', () => {
+        it('should support simple nested generators that fail', (done) => {
+            execRetryOnce.execute(nestedGenerator)
+                .then((data) => {
+                    done(new Error('should catch/propagate nested errors in threads'));
+                }).catch(errors => {
+                    for (error of errors)
+                        assert.equal(error[0].message, 'nested generator error');
+                    done();
+                });
+        });
         it('should catch errors from nested tasks', function (done) {
             execRetryOnce.execute(nestedError)
                 .then((data) => {
                     done(new Error('should catch/propagate nested errors in threads'));
                 }).catch(errors => {
                     for (error of errors)
-                        assert.equal(error[0].message, 'nested')
-                    done()
+                        assert.equal(error[0].message, 'nested');
+                    done();
                 });
         });
         it('should catch errors from deep nested tasks', function (done) {
             execRetryOnce.execute(deepNestedError)
                 .then((data) => {
-                    done(new Error('should catch/propagate nested errors in threads'));
+                    done(new Error('should catch/propagate deep nested errors in threads'));
                 }).catch(errors => {
                     for (error of errors) {
-                        assert.equal(error[0][0].message, 'nested error')
+                        assert.equal(error[0][0].message, 'deep nested');
                     }
-                    done()
+                    done();
+                });
+        });
+        it('should catch errors from deeper nested tasks', function (done) {
+            execRetryOnce.execute(deeperNestedError)
+                .then((data) => {
+                    done(new Error('should catch/propagate deeper nested errors in threads'));
+                }).catch(errors => {
+                    for (error of errors) {
+                        assert.equal(error[0][0][0].message, 'deeper nested');
+                    }
+                    done();
                 });
         });
     });
