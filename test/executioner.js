@@ -1,15 +1,14 @@
-/*
-    Executioner: Basic functionality
-        - Handling of all value types
-        - Handling of arrays of all value types
-        - Handling of nested tasks/generators
-*/
-
+/**
+ * Executioner: Basic functionality
+ * - Handling of all value types
+ * - Handling of arrays of all value types
+ * - Handling of nested tasks/generators
+ */
 const Executioner = require('../.');
 const { Task } = Executioner;
 const assert = require('assert');
 
-const executioner = new Executioner({ name: 'executor', silent: true });
+const executioner = new Executioner({ name: 'executor', silent: true, retries: 0 });
 
 const dataTask = data => {
     return new Task('dataTask', function* () {

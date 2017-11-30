@@ -1,15 +1,16 @@
-/*
-    Executioner: Threading
-        Test:
-            - Single-core executioners
-            - Multi-core executioners
-            - Single-core/Multi-thread executioners
-            - Heavy tasks
-        for:
-            - Execution start time
-            - Execution end time
-            - Execution data output
-*/
+/**
+ * Executioner: Threading
+ * Test:
+ *   - Single-core executioners
+ *   - Multi-core executioners
+ *   - Single-core/Multi-thread executioners
+ *   - Heavy tasks
+ * For:
+ *   - Execution start time
+ *   - Execution end time
+ *   - Execution data output
+ */
+
 const Executioner = require('../.');
 const { waiter } = require('../lib/templates');
 const { Task } = Executioner;

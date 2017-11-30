@@ -1,14 +1,14 @@
-/*
-    Executioner: Test error propagation
-        - Errors in top level
-        - Errors in nested tasks
-        - Errors in promises
-        - Caught errors
-*/
-
+/**
+ * Executioner: Test error propagation
+ * - Errors in top level
+ * - Errors in nested tasks
+ * - Errors in promises
+ * - Yielded Error objects
+ * - Nested errors
+ */
 const Executioner = require('../.');
 const { Task } = Executioner;
-const { functor } = Executioner.Templates;
+const { functor, spawn } = Executioner.Templates;
 const assert = require('assert');
 
 const execNoRetry = new Executioner({
@@ -62,9 +62,7 @@ const errAccum = promises => {
 };
 
 const nestedError = new Task(function* () {
-    yield function* _nest() {
-        data = yield [function* () { yield failGenYield('nested error'); }];
-    };
+    data = yield [(function* nested() { yield new Error('nested'); })];
 });
 
 describe('Executioner', () => {
@@ -110,8 +108,10 @@ describe('Executioner', () => {
         it('should catch errors from nested tasks', function (done) {
             execRetry.execute(nestedError)
                 .then((data) => {
-                    done(new Error('should have failed'));
+                    done(new Error('should catch/propagate nested errors in threads'));
                 }).catch(errors => {
+                    for (error of errors)
+                        assert.equal(error[0].message, 'nested')
                     done()
                 });
         });

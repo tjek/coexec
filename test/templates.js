@@ -1,7 +1,6 @@
-/*
-    Executioner: Templates
-*/
-
+/**
+ * Executioner: Templates
+ */
 const Executioner = require('../.');
 const { MochaEventHandler } = require('./threading');
 const { spawn, waiter, functor, sync, callback } = Executioner.Templates;

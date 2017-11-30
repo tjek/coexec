@@ -1,8 +1,7 @@
-/*
-    Executioner: Event emittion
-        - on 'done' event
-*/
-
+/**
+ * Executioner: Event emittion
+ * - on 'done' event
+ */
 const Executioner = require('../.');
 const { Task } = Executioner;
 const assert = require('assert');
