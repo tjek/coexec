@@ -1,6 +1,6 @@
 {
   "name": "co-executioner",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Wrap/manage/throttle/pool yieldables",
   "main": "index.js",
   "keywords": [
