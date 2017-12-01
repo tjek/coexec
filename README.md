@@ -1,5 +1,5 @@
 # Co-Executioner
-[![NPM version](https://img.shields.io/npm/v/co-executioner.svg?style=flat-square)](https://npmjs.org/package/co-executioner)
+[![NPM version](https://img.shields.io/npm/v/co-executioner.svg?style=flat)](https://npmjs.org/package/co-executioner)
 [![Build Status](https://travis-ci.org/shopgun/coexec.svg?branch=master)](https://travis-ci.org/shopgun/coexec?branch=master)
 
 Co-Executioner wraps around generator functions managing execution to regulate heavy tasks by providing multi-level, configurable pooling and retry strategies, while allowing for inline non-blocking code.
