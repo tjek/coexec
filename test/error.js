@@ -94,6 +94,17 @@ const deeperNestedError = new Task(function* () {
     };
 });
 
+const tryCatchTask = new Task(function* () {
+    yield function* _nest() {
+        try {
+            err = yield Promise.reject('error');
+        } catch (e) {
+            return yield true;
+        }
+        yield false;
+    };
+});
+
 describe('Executioner', () => {
     describe('Errors', () => {
         it('should catch and return top-level errors', () => {
@@ -174,6 +185,17 @@ describe('Executioner', () => {
                         assert.equal(error[0][0][0].message, 'deeper nested');
                     }
                     done();
+                });
+        });
+    });
+    describe('Error leniency', () => {
+        it('should not catch errors in try {} catch {} blocks', function (done) {
+            execRetryOnce.execute(tryCatchTask)
+                .then((data) => {
+                    assert.equal(data, true);
+                    done();
+                }).catch((errors) => {
+                    done(new Error('should not fail'))
                 });
         });
     });
