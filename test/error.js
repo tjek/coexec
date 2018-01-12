@@ -122,7 +122,22 @@ const tryCatchMultiNested = new Task(function* () {
         try {
             yield function* () {
                 yield function* () {
-                    yield nest('fail');
+                    throw new Error('fail');
+                }
+            }
+        } catch (e) {
+            assert.equal(e.message, 'fail', 'should catch the correct error');
+            return yield true;
+        }
+    }
+});
+
+const tryCatchMultiNestedError = new Task(function* () {
+    yield function* () {
+        try {
+            yield function* () {
+                yield function* () {
+                    yield new Error('fail');
                 }
             }
         } catch (e) {
@@ -234,14 +249,23 @@ describe('Executioner', () => {
                     done(new Error('should not fail'))
                 });
         });
-    });
-    it('should not fail for multi-nested thrown exceptions within try/catch blocks', function (done) {
-        execRetryOnce.execute(tryCatchMultiNested)
-            .then((data) => {
-                assert.equal(data, true);
-                done();
-            }).catch((errors) => {
-                done(errors[0] || 'should not fail');
-            });
+        it('should not fail for multi-nested thrown exceptions within try/catch blocks', function (done) {
+            execRetryOnce.execute(tryCatchMultiNested)
+                .then((data) => {
+                    assert.equal(data, true);
+                    done();
+                }).catch((errors) => {
+                    done(errors[0] || 'should not fail');
+                });
+        });
+        it('should not fail for multi-nested error yields within try/catch blocks', function (done) {
+            execRetryOnce.execute(tryCatchMultiNestedError)
+                .then((data) => {
+                    assert.equal(data, true);
+                    done();
+                }).catch((errors) => {
+                    done(errors[0] || 'should not fail');
+                });
+        });
     });
 });
