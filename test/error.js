@@ -97,8 +97,9 @@ const deeperNestedError = new Task(function* () {
 const tryCatchTask = new Task(function* () {
     yield function* _nest() {
         try {
-            err = yield Promise.reject('error');
+            err = yield Promise.reject('fail');
         } catch (e) {
+            assert.equal(e.message, 'fail', 'should catch the correct error');
             return yield true;
         }
         yield false;
@@ -110,6 +111,7 @@ const tryCatchNested = new Task(function* () {
         try {
             yield nest('fail');
         } catch (e) {
+            assert.equal(e.message, 'fail', 'should catch the correct error');
             return yield true;
         }
     }
