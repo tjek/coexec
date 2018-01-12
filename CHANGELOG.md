@@ -1,3 +1,8 @@
+0.0.4 / 2018-01-12
+==================
+
+  * try/catch block functionality extended to support deep nested yields of isError objects and throws
+
 0.0.3 / 2018-01-11
 ==================
 
