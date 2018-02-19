@@ -102,10 +102,10 @@ const tryCatchTask = new Task(function* () {
         assert.equal(e.message, 'fail', 'should catch the promise rejection error [1]');
     }
     try {
-        err = yield nestedError();
+        err = yield nestedError;
         assert.fail('should catch the nested task error [0]');
     } catch (e) {
-        assert.equal(e.message, 'fail', 'should catch the nested task error [1]');
+        assert.equal(e[0][0].message, 'nested', 'should catch the nested task error [1]');
     }
     try {
         err = yield new Error('fail');
