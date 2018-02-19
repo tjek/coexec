@@ -95,15 +95,25 @@ const deeperNestedError = new Task(function* () {
 });
 
 const tryCatchTask = new Task(function* () {
-    yield function* _nest() {
-        try {
-            err = yield Promise.reject('fail');
-        } catch (e) {
-            assert.equal(e.message, 'fail', 'should catch the correct error');
-            return yield true;
-        }
-        yield false;
-    };
+    try {
+        err = yield Promise.reject('fail');
+        assert.fail('should catch the promise rejection error [0]');
+    } catch (e) {
+        assert.equal(e.message, 'fail', 'should catch the promise rejection error [1]');
+    }
+    try {
+        err = yield nestedError();
+        assert.fail('should catch the nested task error [0]');
+    } catch (e) {
+        assert.equal(e.message, 'fail', 'should catch the nested task error [1]');
+    }
+    try {
+        err = yield new Error('fail');
+        assert.fail('should catch the error yield [0]');
+    } catch (e) {
+        assert.equal(e.message, 'fail', 'should catch the error yield [1]');
+    }
+    yield true;
 });
 
 const tryCatchNested = new Task(function* () {
@@ -232,7 +242,7 @@ describe('Executioner', () => {
     });
     describe('Error leniency', () => {
         it('should not fail for promise rejections within try/catch blocks', function (done) {
-            execRetryOnce.execute(tryCatchTask)
+            execNoRetry.execute(tryCatchTask)
                 .then((data) => {
                     assert.equal(data, true);
                     done();
@@ -241,7 +251,7 @@ describe('Executioner', () => {
                 });
         });
         it('should not fail for nested thrown exceptions within try/catch blocks', function (done) {
-            execRetryOnce.execute(tryCatchNested)
+            execNoRetry.execute(tryCatchNested)
                 .then((data) => {
                     assert.equal(data, true);
                     done();
@@ -250,7 +260,7 @@ describe('Executioner', () => {
                 });
         });
         it('should not fail for multi-nested thrown exceptions within try/catch blocks', function (done) {
-            execRetryOnce.execute(tryCatchMultiNested)
+            execNoRetry.execute(tryCatchMultiNested)
                 .then((data) => {
                     assert.equal(data, true);
                     done();
@@ -259,7 +269,7 @@ describe('Executioner', () => {
                 });
         });
         it('should not fail for multi-nested error yields within try/catch blocks', function (done) {
-            execRetryOnce.execute(tryCatchMultiNestedError)
+            execNoRetry.execute(tryCatchMultiNestedError)
                 .then((data) => {
                     assert.equal(data, true);
                     done();
