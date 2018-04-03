@@ -57,7 +57,7 @@ describe('Executioner', () => {
                 .then(data => assert.deepEqual(data, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]))
                 .catch(assert.fail);
         });
-        return it('should handle task/generator nesting and value returns', () => {
+        it('should handle task/generator nesting and value returns', () => {
             executioner.execute(sumTask)
                 .then(data => assert.deepEqual(data, 30, 'should return 30')).catch(assert.fail);
         });
@@ -76,7 +76,7 @@ describe('Executioner', () => {
             executioner.execute(dataArrayTask((i => function* () { return yield i; }), 10))
                 .then(res => assert.deepEqual(res, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]))
         );
-        return it('should handle new Task [generatorFn]', () =>
+        it('should handle new Task [generatorFn]', () =>
             executioner.execute(dataArrayTask((function* (i) { return yield i; }), 10))
                 .then(res => assert.deepEqual(res, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]))
         );
@@ -107,7 +107,7 @@ describe('Executioner', () => {
                 });
             }));
         });
-        return it('should be able to yield tasks with cycling exec refs (A -> [B, A] -> [[B, A], [A, B]])', function () {
+        it('should be able to yield tasks with cycling exec refs (A -> [B, A] -> [[B, A], [A, B]])', function () {
             let taskRecursions = 200;
             var genTask = (execA, execB) => new Task('cycling', function* () {
                 taskRecursions--;
@@ -118,5 +118,6 @@ describe('Executioner', () => {
             });
             return execA.execute(genTask(execA, execB));
         });
+        it('should avoid deadlocks from functions that call executioner.execute');
     });
 });
