@@ -109,7 +109,7 @@ describe('Executioner', () => {
         });
         it('should be able to yield tasks with cycling exec refs (A -> [B, A] -> [[B, A], [A, B]])', function () {
             let taskRecursions = 200;
-            var genTask = (execA, execB) => new Task('cycling', function* () {
+            const genTask = (execA, execB) => new Task('cycling', function* () {
                 taskRecursions--;
                 if (taskRecursions < 0) {
                     return true;
@@ -118,6 +118,15 @@ describe('Executioner', () => {
             });
             return execA.execute(genTask(execA, execB));
         });
-        it('should avoid deadlocks from functions that call executioner.execute');
+        it('should avoid deadlocks from functions that call executioner.execute', () => {
+            const execSingle = new Executioner('single-core-thread', { silent: true, cores: 1, threads: 1, retries: 0 });
+            let deadLockTask = new Task('deadlock', function* () {
+                return yield execSingle.execute(dataTask(10));
+            });
+
+            const process = execSingle.execute(deadLockTask).then((data) => {
+                assert.equal(data, 10, 'should not lock and return proper data');
+            });
+        });
     });
 });
