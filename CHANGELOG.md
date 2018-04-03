@@ -1,3 +1,8 @@
+0.0.5 / 2018-04-03
+==================
+
+  * resolve possible deadlocks that occur from using `yield executioner.execute` from within a task
+
 0.0.4 / 2018-01-12
 ==================
 
