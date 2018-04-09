@@ -1,3 +1,8 @@
+0.0.6 / 2018-04-09
+==================
+
+  * fix resolve possible deadlocks that occur from using `yield executioner.execute` from within a task, support for arrays of processes, more tests
+
 0.0.5 / 2018-04-03
 ==================
 
