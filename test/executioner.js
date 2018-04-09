@@ -43,9 +43,21 @@ describe('Executioner', () => {
             executioner.execute(dataTask(5))
                 .then(data => assert.equal(data, 5)).catch(assert.fail);
         });
+        it('should handle yield {literal}', () => {
+            executioner.execute(dataTask('5'))
+                .then(data => assert.equal(data, '5')).catch(assert.fail);
+        });
         it('should handle yield {object}', () => {
             executioner.execute(dataTask({ field: 'value' }))
                 .then(data => assert.deepEqual(data, { field: 'value' })).catch(assert.fail);
+        });
+        it('should handle yield [{number}]', () => {
+            executioner.execute(dataTask([5]))
+                .then(data => assert.equal(data[0], 5)).catch(assert.fail);
+        });
+        it('should handle yield [{literal}]', () => {
+            executioner.execute(dataTask(['5']))
+                .then(data => assert.equal(data[0], '5')).catch(assert.fail);
         });
         it('should handle yield [object]', () => {
             executioner.execute(dataTask([{ field: 'value', field: 'value' }]))
@@ -118,14 +130,28 @@ describe('Executioner', () => {
             });
             return execA.execute(genTask(execA, execB));
         });
-        it('should avoid deadlocks from functions that call executioner.execute', () => {
-            const execSingle = new Executioner('single-core-thread', { silent: true, cores: 1, threads: 1, retries: 0 });
-            let deadLockTask = new Task('deadlock', function* () {
+        it('should avoid deadlocks from functions that call executioner.execute', function(done) {
+            this.timeout(1000);
+            const execSingle = new Executioner({name: 'single-thread',  silent: true, cores: 1, threads: 1, retries: 0 });
+            const deadLockTask = new Task('deadlock', function* () {
                 return yield execSingle.execute(dataTask(10));
             });
 
-            const process = execSingle.execute(deadLockTask).then((data) => {
+            execSingle.execute(deadLockTask).then((data) => {
                 assert.equal(data, 10, 'should not lock and return proper data');
+                done();
+            });
+        });
+        it('should avoid deadlocks from functions that call executioner.execute [array]', function() {
+            this.timeout(1000);
+            const execSingle = new Executioner({name: 'single-thread',  silent: true, cores: 1, threads: 1, retries: 0 });
+            const deadLockTask = new Task('deadlock', function* () {
+                const p1 = execSingle.execute(dataTask(10));
+                return yield [p1];
+            });
+
+            return execSingle.execute(deadLockTask).then((data) => {
+                assert.deepEqual(data, [10], 'should not lock and return proper data');
             });
         });
     });
