@@ -1,3 +1,9 @@
+0.1.0 / 2018-04-12
+==================
+
+  * try/catch will catch yielded error objects or throws whether those are nested in yieldables or not; Errors bubble up and get caught
+  * **BREAKING CHANGE:** removed functionality similar to implicit returns where if there is no return statement in a Generator the value of the last yield statement is returned 
+
 0.0.6 / 2018-04-09
 ==================
 
