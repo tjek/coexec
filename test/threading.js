@@ -12,9 +12,10 @@
  */
 
 const Executioner = require('../.');
-const { waiter } = require('../lib/templates');
-const { Task } = Executioner;
+const {waiter} = require('../lib/templates');
+const {Task} = Executioner;
 const assert = require('assert');
+
 class MochaEvent {
     constructor(name, handler) {
         this.name = name;
@@ -58,7 +59,7 @@ describe('Executioner', () =>
             cores: 8,
             threads: 1
         });
-        const multipp = new Executioner({
+        const multiThread = new Executioner({
             name: 'multi++',
             silent: true,
             cores: 8,
@@ -69,13 +70,14 @@ describe('Executioner', () =>
             if (data == null) data = true;
             return new Task(`t${name}`, function* () {
                 eh.happened(`start${name}`);
-                const res = yield new Promise((resolve) => {
+                yield new Promise((resolve) => {
                     if (wait > 0) {
                         setTimeout((() => resolve(true)), wait);
                     } else {
                         resolve(true);
                     }
                 });
+
                 eh.happened(`end${name}`);
                 return data;
             });
@@ -104,14 +106,17 @@ describe('Executioner', () =>
                     }).catch(assert.fail);
             });
             const t = new Task('parallel', function* () {
-                const data = yield [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(i => taskGen(i, (100 - (i * 10)), i));
+                const data = yield [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((i) => taskGen(i, (100 - (i * 10)), i));
+
                 return data;
             });
+
             return it('should not parallelize [thread level]', (done) => {
                 eh.clear();
                 multi.execute(t)
                     .then((data) => {
                         const expectedEvents = [];
+
                         for (let i = 0; i <= 10; i++) {
                             expectedEvents.push(`start${i}`);
                             expectedEvents.push(`end${i}`);
@@ -127,11 +132,13 @@ describe('Executioner', () =>
             it('should parallelize all [thread level]', (done) => {
                 eh.clear();
                 const t = new Task('parallel', function* () {
-                    yield [0, 1, 2, 3, 4, 5].map(i => taskGen(i, (i * 5), i));
+                    return yield [0, 1, 2, 3, 4, 5].map((i) => taskGen(i, (i * 5), i));
                 });
-                multipp.execute(t).then((data) => {
+
+                multiThread.execute(t).then((data) => {
                     let i;
                     const expectedEvents = [];
+
                     for (i = 0; i <= 5; i++) {
                         expectedEvents.push(`start${i}`);
                     }
@@ -146,12 +153,14 @@ describe('Executioner', () =>
             it('should parallelize all, ending in reverse order [thread level]', (done) => {
                 eh.clear();
                 const t = new Task('parallel', function* () {
-                    yield [0, 1, 2, 3, 4, 5].map(i => taskGen(i, ((6 - i) * 5), i));
+                    return yield [0, 1, 2, 3, 4, 5].map((i) => taskGen(i, ((6 - i) * 5), i));
                 });
-                multipp.execute(t)
+
+                multiThread.execute(t)
                     .then((data) => {
                         let i;
                         const expectedEvents = [];
+
                         for (i = 0; i <= 5; i++) {
                             expectedEvents.push(`start${i}`);
                         }
@@ -166,12 +175,14 @@ describe('Executioner', () =>
             it('should parallelize some, queue rest [thread level]', (done) => {
                 eh.clear();
                 const t = new Task('parallel', function* () {
-                    yield [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(i => taskGen(i, (i * 5), i));
+                    return yield [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((i) => taskGen(i, (i * 5), i));
                 });
-                multipp.execute(t)
+
+                multiThread.execute(t)
                     .then((data) => {
                         assert.deepEqual(data, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], 'should return proper data');
                         const expectedEvents = ['start0', 'start1', 'start2', 'start3', 'start4', 'start5', 'start6', 'start7', 'end0', 'start8', 'end1', 'start9', 'end2', 'start10', 'end3', 'end4', 'end5', 'end6', 'end7', 'end8', 'end9', 'end10'];
+
                         assert.deepEqual(eh.events, expectedEvents, 'should run in parallel mode');
                         done();
                     }).catch(done);
@@ -179,12 +190,14 @@ describe('Executioner', () =>
             it('should parallelize some, queue rest in reverse order [thread level]', (done) => {
                 eh.clear();
                 const t = new Task('parallel', function* () {
-                    yield [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(i => taskGen(i, ((6 - i) * 5), i));
+                    return yield [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((i) => taskGen(i, ((6 - i) * 5), i));
                 });
-                multipp.execute(t)
+
+                multiThread.execute(t)
                     .then((data) => {
                         assert.deepEqual(data, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], 'should return proper data');
                         const expectedEvents = ['start0', 'start1', 'start2', 'start3', 'start4', 'start5', 'start6', 'start7', 'end6', 'end7', 'start8', 'start9', 'end8', 'end9', 'start10', 'end10', 'end5', 'end4', 'end3', 'end2', 'end1', 'end0'];
+
                         assert.deepEqual(eh.events, expectedEvents, 'should run in parallel mode');
                         done();
                     }).catch(done);
@@ -193,7 +206,9 @@ describe('Executioner', () =>
 
         describe('Heavy Tasks', () => {
             const asyncT = function (ms, ev, count) {
-                if (count == null) { count = 1; }
+                if (count == null) {
+                    count = 1;
+                }
                 return new Task('parallel', function* () {
                     eh.happened(`start-${ev}`);
                     while (count-- > 0) {
@@ -206,12 +221,14 @@ describe('Executioner', () =>
             it('should not start other tasks when a heavy one exists', (done) => {
                 // Put heavy task first with big waiter
                 // Put another task after without waiter
-                // Heavy should thow end event before the other one
+                // Heavy should throw end event before the other one
                 eh.clear();
                 const heavyT = asyncT(200, 'heavy');
+
                 heavyT.config.heavy = true;
                 const lightT = asyncT(10, 'light');
-                Promise.all([multipp.execute(heavyT), multipp.execute(lightT)])
+
+                Promise.all([multiThread.execute(heavyT), multiThread.execute(lightT)])
                     .then(() => {
                         assert.deepEqual(eh.events, ['start-heavy', 'end-heavy', 'start-light', 'end-light']);
                         return done();
@@ -220,39 +237,44 @@ describe('Executioner', () =>
             it('should pause tasks', (done) => {
                 // Put task that has multiple small waiters
                 // Put heavy task with one waiter, way bigger than the other ones
-                // Heavy should thow end event before the other one
+                // Heavy should throw end event before the other one
                 eh.clear();
                 const lightT = asyncT(10, 'light', 5);
                 const heavyT = asyncT(100, 'heavy');
+
                 heavyT.config.heavy = true;
-                const p1 = multipp.execute(lightT);
+                const p1 = multiThread.execute(lightT);
                 const after = () => {
-                    const p2 = multipp.execute(heavyT);
+                    const p2 = multiThread.execute(heavyT);
+
                     return Promise.all([p1, p2])
                         .then(() => {
                             assert.deepEqual(eh.events, ['start-light', 'start-heavy', 'end-heavy', 'end-light']);
                             return done();
                         }).catch(done);
                 };
+
                 setTimeout(after, 10);
             });
             it('should not pause tasks', (done) => {
                 // Put task that has multiple small waiters
                 // Put another task with one waiter, way bigger than the other one
-                // Second task should thow end event after the other one
+                // Second task should throw end event after the other one
                 // Use same numbers to demonstrate the the previous test is actually valid and heavy works
                 eh.clear();
                 const lightT = asyncT(10, 'light', 5);
                 const heavyT = asyncT(100, 'heavy');
-                const p1 = multipp.execute(lightT);
+                const p1 = multiThread.execute(lightT);
                 const after = () => {
-                    const p2 = multipp.execute(heavyT);
+                    const p2 = multiThread.execute(heavyT);
+
                     return Promise.all([p1, p2])
                         .then(() => {
                             assert.deepEqual(eh.events, ['start-light', 'start-heavy', 'end-light', 'end-heavy']);
                             return done();
                         }).catch(done);
                 };
+
                 setTimeout(after, 10);
             });
             it('should pause execution of subtasks unrelated to the main task [not implemented]');

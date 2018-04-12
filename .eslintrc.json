@@ -1,0 +1,33 @@
+{
+    "extends": ["eslint:recommended", "google"],
+    "parserOptions": {
+        "ecmaVersion": 9
+    },
+    "env": {
+        "node": true,
+        "es6": true,
+        "jest": true
+    },
+    "rules": {
+        "comma-dangle": ["error", "never"],
+        "quotes": ["error", "single"],
+        "indent": ["error", 4],
+        "no-empty": 0,
+        "no-regex-spaces": 0,
+        "no-console": 0,
+        "no-return-await": 1,
+        "max-len": 0,
+        "newline-after-var": ["error", "always"],
+        "func-call-spacing": ["error", "never"],
+        "eol-last": 0,
+        "space-before-function-paren": 0,
+        "require-jsdoc": 0,
+        "one-var": ["error", "never"],
+        "prefer-spread": 0,
+        "no-dupe-keys": "error",
+        "keyword-spacing": ["error", { "before": true, "after": true }],
+        "no-trailing-spaces": 0,
+        "require-yield": 0,
+        "no-invalid-this": 0
+    }
+}
