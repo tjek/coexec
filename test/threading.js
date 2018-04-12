@@ -153,7 +153,7 @@ describe('Executioner', () =>
             it('should parallelize all, ending in reverse order [thread level]', (done) => {
                 eh.clear();
                 const t = new Task('parallel', function* () {
-                    return yield [0, 1, 2, 3, 4, 5].map((i) => taskGen(i, ((6 - i) * 5), i));
+                    return yield [0, 1, 2, 3, 4, 5].map((i) => taskGen(i, ((11 - i) * 10), i));
                 });
 
                 multiThread.execute(t)

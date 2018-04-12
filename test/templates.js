@@ -27,8 +27,8 @@ const functorT = () => {
                 eh.happened(`mid${d}`);
                 const groupSize = 4;
                 const waitGroup = Math.floor(d / groupSize);
-                const waitTime = (40 + (100 * waitGroup)) - (10 * (waitGroup + 1) * (d % groupSize));
-
+                const waitTime = (250 + (500 * waitGroup)) - (50 * (waitGroup + 1) * (d % groupSize));
+                
                 yield waiter(waitTime);
                 eh.happened(`end${d}`);
                 return d;
@@ -62,13 +62,13 @@ describe('Templates', () => {
             let firstIsDone = false;
             let secondIsDone = false;
             const p1 = dualCore.execute(spawn(function* () {
-                return yield waiter(20);
+                return yield waiter(200);
             })).then(() => {
                 firstIsDone = true;
                 assert.equal(secondIsDone, true, 'lower waiting time should be lower');
             });
             const p2 = dualCore.execute(spawn(function* () {
-                return yield waiter(10);
+                return yield waiter(100);
             })).then(() => {
                 secondIsDone = true;
                 assert.equal(firstIsDone, false, 'higher waiting time should be higher');
