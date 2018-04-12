@@ -28,6 +28,7 @@ Create a task
 const Task = Executioner.Task;
 task = new Task('simple task', function*() {
   // Do async operations
+  return data; // data to resolve
 });
 ```
 Execute the task
@@ -51,10 +52,10 @@ When yielding a generator function, it is added to the process queue of the task
 *NOTE:* _If you want to actually return generator functions, you may wrap them in another object._
 ```js
 ...
-data = yield function*() { yield true };         // data = true
-data = yield function*() { yield true }();       // data = true
+data = yield function*() { return true };         // data = true
+data = yield function*() { return true }();       // data = true
 data = yield function*() { yield {               // data = function*
-    data: function*(){ yield true; }
+    data: function*(){ return true; }
   }
 };
 ```
@@ -67,7 +68,7 @@ Yielding promises will return the resolved value, or throw an error when rejecte
 Task objects that are `yield`, will run as sub-tasks, unless another executioner is set in its configuration.
 ```js
 // data = data returned from anotherGenerator
-let  data = yield new Task('sub', function*() { yield anotherGenerator(); });
+let data = yield new Task('sub', function*() { yield anotherGenerator(); });
 ```
 
 ### Arrays
@@ -78,9 +79,9 @@ Arrays are tested to see if all elements are of one of the following types:
 In each of the cases, the values will be resolved using threading.
 Note: _An executioner may have a different count of threads and cores, arrays are parallelized using the number of threads, even tasks, unless tasks have a specified executioner_
 ```js
-let power = function*(data) { yield data * data; }
+let power = function*(data) { return data * data; }
 ...
-data = [0..10].map(power) // data = [0, 1, 4, 9, ...]
+data = yield [0..10].map(power) // data = [0, 1, 4, 9, ...]
 ```
 
 ### Values
@@ -125,7 +126,7 @@ heavy: Boolean               // If set to true, no other tasks will cycle while 
 Co-Executioner comes with a set of templates to serve common usage patterns.
 You can easily access them as such:
 ```js
-{ Templates } = require('co-executioner');
+{Templates} = require('co-executioner');
 ```
 
 ### waiter(ms)
