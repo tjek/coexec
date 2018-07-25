@@ -90,7 +90,7 @@ describe('Templates', () => {
                 assert.deepEqual(midEvents, ([0, 1, 2, 3, 4, 5, 6, 7].map((n) => `mid${n}`)), 'should mid in serial order');
                 assert.deepEqual(endEvents, ([0, 1, 2, 3, 4, 5, 6, 7].map((n) => `end${n}`)), 'should end in serial order');
             }), done);
-        });
+        }).timeout(5000);
         it('should execute functions in batches using functor', (done) => {
             eh.clear();
             succeed(quadCore.execute(functorT()).then((data) => {
