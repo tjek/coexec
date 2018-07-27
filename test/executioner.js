@@ -114,6 +114,29 @@ describe('Executioner', () => {
     });
 
     describe('Configuration', () => it('should run yielded tasks with executioner config passed as string [not supported]'));
+    
+    describe('Shortcuts', () => {
+        const g = function* () {
+            return 5;
+        };
+
+        it('should execute Generator', (done) => {
+            executioner.execute(g())
+                .then((res) => {
+                    assert.equal(res, 5);
+                    done();
+                })
+                .catch(done);
+        });
+        it('should execute GeneratorFn', (done) => {
+            executioner.execute(g)
+                .then((res) => {
+                    assert.equal(res, 5);
+                    done();
+                })
+                .catch(done);
+        });
+    });
 
     describe('Deadlocks', () => {
         const execA = new Executioner({name: 'singleA', threads: 1, cores: 1, silent: true});
