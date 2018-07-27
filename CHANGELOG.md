@@ -1,3 +1,16 @@
+0.1.1 / 2018-07-27
+==================
+
+  * shortcut to execute generators and generator functions directly.
+
+    Previously: `t = new Task(generator); executioner.execute(t);`
+
+    Shortcut #1: `executioner.execute(generator);`
+
+    Shortcut #2: `executioner.execute(generator(data));`
+
+    **_NOTE: Shortcuts generate tasks with default configuration._**
+
 0.1.0 / 2018-04-12
 ==================
 
