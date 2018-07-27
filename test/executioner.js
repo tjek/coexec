@@ -114,6 +114,29 @@ describe('Executioner', () => {
     });
 
     describe('Configuration', () => it('should run yielded tasks with executioner config passed as string [not supported]'));
+    
+    describe('Shortcuts', () => {
+        const g = function* () {
+            return 5;
+        };
+
+        it('should execute Generator', (done) => {
+            executioner.execute(g())
+                .then((res) => {
+                    assert.equal(res, 5);
+                    done();
+                })
+                .catch(done);
+        });
+        it('should execute GeneratorFn', (done) => {
+            executioner.execute(g)
+                .then((res) => {
+                    assert.equal(res, 5);
+                    done();
+                })
+                .catch(done);
+        });
+    });
 
     describe('Deadlocks', () => {
         const execA = new Executioner({name: 'singleA', threads: 1, cores: 1, silent: true});
@@ -151,8 +174,7 @@ describe('Executioner', () => {
 
             return execA.execute(genTask(execA, execB));
         });
-        it('should avoid deadlocks from functions that call executioner.execute', function (done) {
-            this.timeout(1000);
+        it('should avoid deadlocks from functions that call executioner.execute', (done) => {
             const execSingle = new Executioner({name: 'single-thread', silent: true, cores: 1, threads: 1, retries: 0});
             const deadLockTask = new Task('deadlock', function* () {
                 return yield execSingle.execute(dataTask(10));
@@ -162,9 +184,8 @@ describe('Executioner', () => {
                 assert.equal(data, 10, 'should not lock and return proper data');
                 done();
             });
-        });
-        it('should avoid deadlocks from functions that call executioner.execute [array]', function () {
-            this.timeout(1000);
+        }).timeout(1000);
+        it('should avoid deadlocks from functions that call executioner.execute [array]', () => {
             const execSingle = new Executioner({name: 'single-thread', silent: true, cores: 1, threads: 1, retries: 0});
             const deadLockTask = new Task('deadlock', function* () {
                 const p1 = execSingle.execute(dataTask(10));
@@ -175,6 +196,6 @@ describe('Executioner', () => {
             return execSingle.execute(deadLockTask).then((data) => {
                 assert.deepEqual(data, [10], 'should not lock and return proper data');
             });
-        });
+        }).timeout(1000);
     });
 });
