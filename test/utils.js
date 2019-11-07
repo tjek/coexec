@@ -108,8 +108,8 @@ describe('Utils', function () {
             const genfnArr = utils.getType([(function* () {
                 return yield true;
             }), (function* () {
-                    return yield true;
-                })]);
+                return yield true;
+            })]);
             const taskArr = utils.getType([new Task(dummyGeneratorFn), new Task(dummyGeneratorFn)]);
             const arr0 = utils.getType([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
             const arr1 = utils.getType([new Task(dummyGeneratorFn), 1]);
@@ -142,9 +142,11 @@ describe('Utils', function () {
             assert.equal(c, data.c);
         });
         it('should inject functions and bind them', function () {
-            const scope = {a: 'apple', f: function() {
-                return `eat an ${this.a}`;
-            }};
+            const scope = {
+                a: 'apple', f: function () {
+                    return `eat an ${this.a}`;
+                }
+            };
             const [f] = utils.inject(scope, 'f');
 
             assert.equal(f(), 'eat an apple');

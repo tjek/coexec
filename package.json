@@ -1,6 +1,6 @@
 {
   "name": "co-executioner",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Wrap/manage/throttle/pool yieldables",
   "main": "index.js",
   "keywords": [
@@ -19,9 +19,9 @@
     "es6"
   ],
   "devDependencies": {
-    "eslint": "^4.19.1",
-    "eslint-config-google": "^0.9.1",
-    "mocha": "^4.0.0"
+    "eslint": "^6.6.0",
+    "eslint-config-google": "^0.14.0",
+    "mocha": "^6.2.2"
   },
   "scripts": {
     "test": "eslint lib test && mocha"

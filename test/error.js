@@ -94,7 +94,7 @@ const deepNestedError = new Task(function* deepNestedError() {
             yield failGenYield('deep nested');
         }];
     };
-}); 
+});
 
 const deeperNestedError = new Task(function* deeperNestedError() {
     yield function* _nest() {
@@ -110,6 +110,7 @@ const tryCatchTask = new Task(function* tryCatchTask() {
     let data;
 
     try {
+        // eslint-disable-next-line prefer-promise-reject-errors
         yield Promise.reject('fail');
         assert.fail('should catch the promise rejection error [0]');
     } catch (e) {
@@ -230,7 +231,7 @@ describe('Executioner', () => {
                 .then((data) => {
                     done(new Error('should catch/propagate nested errors in threads'));
                 }).catch((errors) => {
-                    for (let error of errors) {
+                    for (const error of errors) {
                         assert.equal(error[0].message, 'nested generator error');
                     }
                     done();
@@ -241,7 +242,7 @@ describe('Executioner', () => {
                 .then((data) => {
                     done(new Error('should catch/propagate nested errors in threads'));
                 }).catch((errors) => {
-                    for (let error of errors) {
+                    for (const error of errors) {
                         assert.equal(error[0].message, 'nested');
                     }
                     done();
@@ -252,7 +253,7 @@ describe('Executioner', () => {
                 .then((data) => {
                     done(new Error('should catch/propagate deep nested errors in threads'));
                 }).catch((errors) => {
-                    for (let error of errors) {
+                    for (const error of errors) {
                         assert.equal(error[0][0].message, 'deep nested');
                     }
                     done();
@@ -263,7 +264,7 @@ describe('Executioner', () => {
                 .then((data) => {
                     done(new Error('should catch/propagate deeper nested errors in threads'));
                 }).catch((errors) => {
-                    for (let error of errors) {
+                    for (const error of errors) {
                         assert.equal(error[0][0][0].message, 'deeper nested');
                     }
                     done();

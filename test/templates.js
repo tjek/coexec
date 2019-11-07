@@ -21,7 +21,7 @@ const succeed = (p, done) => {
 
 const functorT = () => {
     return spawn(function* () {
-        let fn = (d) => {
+        const fn = (d) => {
             eh.happened(`start${d}`);
             return function* () {
                 eh.happened(`mid${d}`);
