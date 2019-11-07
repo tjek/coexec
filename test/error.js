@@ -9,6 +9,7 @@
 const Executioner = require('../.');
 const {Task} = Executioner;
 const assert = require('assert');
+const {waiter} = require('../lib/templates');
 
 const execNoRetry = new Executioner({
     name: 'no-retry',
@@ -36,6 +37,16 @@ const execRetryOnce = new Executioner({
     retryInterval: 5
 });
 
+const execTimeout = new Executioner({
+    name: 'timeout',
+    silent: true,
+    threads: 1,
+    retries: 0,
+    cores: 1,
+    timeout: 10
+});
+
+
 const failGenYield = (err) => new Task('fail', function* failGenYield() {
     yield new Error(err);
 });
@@ -51,6 +62,16 @@ const failAndSucceed = (failures) => {
         return yield new Error('err');
     });
 };
+
+const timeoutAndFail = new Task('timeoutAndFail', function* timeoutAndFail() {
+    yield waiter(15);
+    return true;
+});
+
+const timeoutAndFailTask = new Task({name: 'timeoutAndFailTask', timeout: 10}, function* timeoutAndFailTask() {
+    yield waiter(30);
+    return true;
+});
 
 const nestTask = (data) => new Task('nested', function* () {
     return yield data;
@@ -222,6 +243,22 @@ describe('Executioner', () => {
                 .catch((errors) => {
                     assert.equal(errors.length, 1 + 10);
                     errors.map((err) => assert.equal(err.message, 'err'));
+                });
+        });
+        it('should timeout [exec config]', () => {
+            return execTimeout.execute(timeoutAndFail)
+                .then(assert.fail)
+                .catch((errors) => {
+                    assert.equal(errors.length, 1);
+                    errors.map((err) => assert.equal(err.message, `timed out after ${execTimeout.config.timeout}`));
+                });
+        });
+        it('should timeout [task config]', () => {
+            return execRetry.execute(timeoutAndFailTask)
+                .then(assert.fail)
+                .catch((errors) => {
+                    assert.equal(errors.length, 1 + 10);
+                    errors.map((err) => assert.equal(err.message, `timed out after ${timeoutAndFailTask.config.timeout}`));
                 });
         });
     });

@@ -111,6 +111,7 @@ threads: Number              // Maximum threads per Process [1]
 silent: Boolean              // Mute logging [false]
 pooling: Boolean             // Keep pool of active tasks, throttle execution to those [true]
 log: Function                // Custom log function, use with silent set to false
+timeout: Number              // Exceeding execution time (in ms) results in task failure. [0 - disabled]
 ```
 Task configuration
 ```js
@@ -119,6 +120,7 @@ retries: Number              // Number of retries before failure
 retryInterval: Number        // Interval between failure and start of retry in ms
 threads: Number              // Maximum threads
 heavy: Boolean               // If set to true, no other tasks will cycle while this Process is running
+timeout: Number              // Exceeding execution time (in ms) results in task failure. [0 - disabled]
 ```
 
 ## Templates
