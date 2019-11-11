@@ -149,12 +149,21 @@ describe('Executioner', () => {
                 yield function* () {
                     return new Error('Error');
                 };
-
                 return new Error('Error2');
             })
                 .then(assert.fail)
                 .catch((errors) => {
                     errors.map((e) => assert.equal(e.message, 'Error'));
+                });
+        });
+        it('should handle yield [Errors]', () => {
+            return executioner.execute(function* () {
+                yield [new Error('Error')];
+                yield new Error('Error2');
+            })
+                .then(assert.fail)
+                .catch((errors) => {
+                    errors.map((e) => assert.equal(e[0].message, 'Error'));
                 });
         });
     });
