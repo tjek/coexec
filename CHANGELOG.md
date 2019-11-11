@@ -1,7 +1,24 @@
+0.1.3 / 2019-11-11
+==================
+
+  * Feature: **Timeout**
+
+    Tasks "expire" and throw a "Timeout" error if config specified on an Executioner or Task level.
+
+  * Better test coverage
+
+    `92.78 -> 98.55` total coverage & 100% line coverage.
+
+  * Cleanup of unreachable code
+
+    Removed mostly obsolete safeguards.
+
+
 0.1.2 / 2019-11-07
 ==================
 
   * Update `eslint` & `mocha`, fix lint
+
 
 0.1.1 / 2018-07-27
 ==================
@@ -20,7 +37,7 @@
 ==================
 
   * try/catch will catch yielded error objects or throws whether those are nested in yieldables or not; Errors bubble up and get caught
-  * **BREAKING CHANGE:** removed functionality similar to implicit returns where if there is no return statement in a Generator the value of the last yield statement is returned 
+  * **BREAKING CHANGE:** removed functionality similar to implicit returns where if there is no return statement in a Generator the value of the last yield statement is returned
 
 0.0.6 / 2018-04-09
 ==================

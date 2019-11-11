@@ -1,6 +1,6 @@
 {
   "name": "co-executioner",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Wrap, manage, throttle & pool deferred tasks",
   "main": "index.js",
   "keywords": [
