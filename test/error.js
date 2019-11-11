@@ -46,6 +46,15 @@ const execTimeout = new Executioner({
     timeout: 10
 });
 
+const execBigTimeout = new Executioner({
+    name: 'timeout',
+    silent: true,
+    threads: 1,
+    retries: 0,
+    cores: 1,
+    timeout: 10000
+});
+
 
 const failGenYield = (err) => new Task('fail', function* failGenYield() {
     yield new Error(err);
@@ -69,6 +78,11 @@ const timeoutAndFail = new Task('timeoutAndFail', function* timeoutAndFail() {
 });
 
 const timeoutAndFailTask = new Task({name: 'timeoutAndFailTask', timeout: 10}, function* timeoutAndFailTask() {
+    yield waiter(30);
+    return true;
+});
+
+const bigTimeoutAndNotFailTask = new Task({name: 'bigTimeoutAndNotFailTask', timeout: 1000}, function* bigTimeoutAndNotFailTask() {
     yield waiter(30);
     return true;
 });
@@ -253,6 +267,10 @@ describe('Executioner', () => {
                     errors.map((err) => assert.equal(err.message, `timed out after ${execTimeout.config.timeout}`));
                 });
         });
+        it('should not timeout [exec config]', () => {
+            return execBigTimeout.execute(timeoutAndFail)
+                .catch(assert.fail);
+        });
         it('should timeout [task config]', () => {
             return execRetry.execute(timeoutAndFailTask)
                 .then(assert.fail)
@@ -260,6 +278,10 @@ describe('Executioner', () => {
                     assert.equal(errors.length, 1 + 10);
                     errors.map((err) => assert.equal(err.message, `timed out after ${timeoutAndFailTask.config.timeout}`));
                 });
+        });
+        it('should not timeout [task config]', () => {
+            return execRetry.execute(bigTimeoutAndNotFailTask)
+                .catch(assert.fail);
         });
     });
     describe('Nested Errors', () => {
