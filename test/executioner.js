@@ -164,25 +164,25 @@ describe('Executioner', () => {
             return executioner.execute(dataTask(dataArrayTask(((i) => function* () {
                 return yield i;
             }), 10)))
-                .then((res) => assert.deepEqual(res, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]))
+                .then((res) => assert.deepEqual(res, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]));
         });
         it('should handle yield [generatorFn]', () => {
             return executioner.execute(dataTask(dataArrayTask((function* (i) {
                 return yield i;
             }), 10)))
-                .then((res) => assert.deepEqual(res, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]))
+                .then((res) => assert.deepEqual(res, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]));
         });
         it('should handle new Task [generator]', () => {
             return executioner.execute(dataArrayTask(((i) => function* () {
                 return yield i;
             }), 10))
-                .then((res) => assert.deepEqual(res, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]))
+                .then((res) => assert.deepEqual(res, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]));
         });
         it('should handle new Task [generatorFn]', () => {
             return executioner.execute(dataArrayTask((function* (i) {
                 return yield i;
             }), 10))
-                .then((res) => assert.deepEqual(res, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]))
+                .then((res) => assert.deepEqual(res, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]));
         });
     });
 
