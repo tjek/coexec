@@ -1,7 +1,7 @@
 {
   "name": "co-executioner",
   "version": "0.1.2",
-  "description": "Wrap/manage/throttle/pool yieldables",
+  "description": "Wrap, manage, throttle & pool deferred tasks",
   "main": "index.js",
   "keywords": [
     "async",
@@ -16,15 +16,19 @@
     "pooling",
     "coro",
     "coroutine",
-    "es6"
+    "es6",
+    "timeout",
+    "deferred"
   ],
   "devDependencies": {
     "eslint": "^6.6.0",
     "eslint-config-google": "^0.14.0",
-    "mocha": "^6.2.2"
+    "mocha": "^6.2.2",
+    "nyc": "^14.1.1"
   },
   "scripts": {
-    "test": "eslint lib test && mocha"
+    "test": "eslint lib test && nyc mocha",
+    "coverage": "nyc mocha"
   },
   "dependencies": {},
   "author": "Iasonas Zotos <iz@shopgun.com>",

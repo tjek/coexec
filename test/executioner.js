@@ -5,6 +5,7 @@
  * - Handling of nested tasks/generators
  */
 const Executioner = require('../.');
+const {waiter} = require('../lib/templates');
 const {Task} = Executioner;
 const assert = require('assert');
 const executioner = new Executioner({name: 'executor', silent: true, retries: 0});
@@ -49,72 +50,151 @@ const sumTask = new Task('summation of nested fns', function* () {
 
 // Test all supported value types
 describe('Executioner', () => {
+    describe('Configuration', () => {
+        it('should accept string as config', () => {
+            const exec = new Executioner('no-config');
+
+            assert.equal(exec.config.name, 'no-config');
+        });
+        it('should accept accept custom logger', () => {
+            const logs = [];
+            const logger = (...args) => {
+                logs.push(args.join(' '));
+            };
+            const exec = new Executioner({name: 'custom-logger', log: logger});
+
+            const logProc = exec.execute(function* () {
+                yield true;
+                return true;
+            }).then(() => {
+                assert.equal(logs.length, 2, 'custom logger should capture logs');
+            });
+
+            return logProc;
+        });
+        it('should work with normal logger', () => {
+            const exec = new Executioner({silent: false});
+            const consoleLog = console.log;
+            const logs = [];
+
+            console.log = (...args) => {
+                logs.push(args.join(' '));
+            };
+
+            exec.on('done', ()=> {
+                console.log = consoleLog;
+            });
+
+            return exec.execute(function* () {
+                yield true;
+                return true;
+            }).then(() => {
+                assert.notEqual(logs.length, 0, 'overriden console.log should be utilized');
+            });
+        });
+        it('should fail on invalid input [executioner]', () => {
+            try {
+                executioner.execute('string');
+                assert.fail('should fail when string is passed as gfn/task');
+            } catch (error) {
+                assert.notEqual(error.message, 'should fail when string is passed as gfn/task');
+            }
+        });
+        it('should fail on invalid input [task]', () => {
+            try {
+                executioner.execute(new Task('fail', 'string'));
+                assert.fail('should fail when string is passed as gfn');
+            } catch (error) {
+                assert.notEqual(error.message, 'should fail when string is passed as gfn/task');
+            }
+        });
+    });
     describe('Value types', () => {
         it('should handle yield {number}', () => {
-            executioner.execute(dataTask(5))
+            return executioner.execute(dataTask(5))
                 .then((data) => assert.equal(data, 5)).catch(assert.fail);
         });
         it('should handle yield {literal}', () => {
-            executioner.execute(dataTask('5'))
+            return executioner.execute(dataTask('5'))
                 .then((data) => assert.equal(data, '5')).catch(assert.fail);
         });
         it('should handle yield {object}', () => {
-            executioner.execute(dataTask({field: 'value'}))
+            return executioner.execute(dataTask({field: 'value'}))
                 .then((data) => assert.deepEqual(data, {field: 'value'})).catch(assert.fail);
         });
         it('should handle yield [{number}]', () => {
-            executioner.execute(dataTask([5]))
+            return executioner.execute(dataTask([5]))
                 .then((data) => assert.equal(data[0], 5)).catch(assert.fail);
         });
         it('should handle yield [{literal}]', () => {
-            executioner.execute(dataTask(['5']))
+            return executioner.execute(dataTask(['5']))
                 .then((data) => assert.equal(data[0], '5')).catch(assert.fail);
         });
         it('should handle yield [object]', () => {
-            executioner.execute(dataTask([{field: 'value'}]))
+            return executioner.execute(dataTask([{field: 'value'}]))
                 .then((data) => assert.deepEqual(data, [{field: 'value'}]))
                 .catch(assert.fail);
         });
         it('should handle yield [promises]', () => {
-            executioner.execute(dataTask([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((i) => Promise.resolve(i))))
+            return executioner.execute(dataTask([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((i) => Promise.resolve(i))))
                 .then((data) => assert.deepEqual(data, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]))
                 .catch(assert.fail);
         });
         it('should handle task/generator nesting and value returns', () => {
-            executioner.execute(sumTask)
+            return executioner.execute(sumTask)
                 .then((data) => assert.deepEqual(data, 30, 'should return 30')).catch(assert.fail);
+        });
+        it('should handle yield [Error]', () => {
+            return executioner.execute(function* () {
+                yield function* () {
+                    return new Error('Error');
+                };
+                return new Error('Error2');
+            })
+                .then(assert.fail)
+                .catch((errors) => {
+                    errors.map((e) => assert.equal(e.message, 'Error'));
+                });
+        });
+        it('should handle yield [Errors]', () => {
+            return executioner.execute(function* () {
+                yield [new Error('Error')];
+                yield new Error('Error2');
+            })
+                .then(assert.fail)
+                .catch((errors) => {
+                    errors.map((e) => assert.equal(e[0].message, 'Error'));
+                });
         });
     });
 
     describe('Array handling', () => {
-        it('should handle yield [generator]', () =>
-            executioner.execute(dataTask(dataArrayTask(((i) => function* () {
+        it('should handle yield [generator]', () => {
+            return executioner.execute(dataTask(dataArrayTask(((i) => function* () {
                 return yield i;
             }), 10)))
-                .then((res) => assert.deepEqual(res, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]))
-        );
-        it('should handle yield [generatorFn]', () =>
-            executioner.execute(dataTask(dataArrayTask((function* (i) {
+                .then((res) => assert.deepEqual(res, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]));
+        });
+        it('should handle yield [generatorFn]', () => {
+            return executioner.execute(dataTask(dataArrayTask((function* (i) {
                 return yield i;
             }), 10)))
-                .then((res) => assert.deepEqual(res, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]))
-        );
-        it('should handle new Task [generator]', () =>
-            executioner.execute(dataArrayTask(((i) => function* () {
+                .then((res) => assert.deepEqual(res, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]));
+        });
+        it('should handle new Task [generator]', () => {
+            return executioner.execute(dataArrayTask(((i) => function* () {
                 return yield i;
             }), 10))
-                .then((res) => assert.deepEqual(res, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]))
-        );
-        it('should handle new Task [generatorFn]', () =>
-            executioner.execute(dataArrayTask((function* (i) {
+                .then((res) => assert.deepEqual(res, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]));
+        });
+        it('should handle new Task [generatorFn]', () => {
+            return executioner.execute(dataArrayTask((function* (i) {
                 return yield i;
             }), 10))
-                .then((res) => assert.deepEqual(res, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]))
-        );
+                .then((res) => assert.deepEqual(res, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]));
+        });
     });
 
-    describe('Configuration', () => it('should run yielded tasks with executioner config passed as string [not supported]'));
-    
     describe('Shortcuts', () => {
         const g = function* () {
             return 5;
@@ -137,7 +217,23 @@ describe('Executioner', () => {
                 .catch(done);
         });
     });
+    describe('Process', () => {
+        it('should be able to stop execution of process', () => {
+            let value = true;
+            const proc = executioner.execute(function* () {
+                yield true;
+                yield waiter(100);
+                yield true;
+                value = false;
+            });
 
+            setTimeout(proc.stop.bind(proc), 10);
+
+            return proc.then(() => {
+                assert.equal(value, true);
+            });
+        });
+    });
     describe('Deadlocks', () => {
         const execA = new Executioner({name: 'singleA', threads: 1, cores: 1, silent: true});
         const execB = new Executioner({name: 'singleB', threads: 1, cores: 1, silent: true});
@@ -197,5 +293,15 @@ describe('Executioner', () => {
                 assert.deepEqual(data, [10], 'should not lock and return proper data');
             });
         }).timeout(1000);
+        it('should avoid simple deadlocks', () => {
+            const execSingle = new Executioner({name: 'single-thread', silent: true, cores: 1, threads: 1, retries: 0});
+            const deadLockTask = new Task('deadlock', function* () {
+                yield new Task({name: 'deadlock_inner', executioner: execSingle}, function* () {
+                    return true;
+                });
+            });
+
+            execSingle.execute(deadLockTask);
+        });
     });
 });

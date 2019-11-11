@@ -16,6 +16,8 @@ const {waiter} = require('../lib/templates');
 const {Task} = Executioner;
 const assert = require('assert');
 
+const WAIT_MULTIPLIER = 3;
+
 class MochaEvent {
     constructor(name, handler) {
         this.name = name;
@@ -72,7 +74,7 @@ describe('Executioner', () =>
                 eh.happened(`start${name}`);
                 yield new Promise((resolve) => {
                     if (wait > 0) {
-                        setTimeout((() => resolve(true)), wait);
+                        setTimeout((() => resolve(true)), wait * WAIT_MULTIPLIER);
                     } else {
                         resolve(true);
                     }

@@ -31,6 +31,23 @@ describe('Utils', function () {
             assert.deepEqual(o === cO, false, 'clone should not be the same object');
         })
     );
+    describe('errorify', () => {
+        it('should return Error objects intact', () => {
+            const error = new Error('error');
+
+            assert.equal(error, utils.errorify(error));
+        });
+        it('should handle undefined', () => {
+            assert.equal('undefined', utils.errorify(undefined).message);
+        });
+        it('should handle null', () => {
+            assert.equal('null', utils.errorify(null).message);
+        });
+        it('should everything', () => {
+            assert.equal(true, utils.errorify('everything').__coexec__exception__);
+            assert.equal(true, utils.errorify(['everything']).__coexec__exception__);
+        });
+    });
     describe('isString', () =>
         it('should recognize strings', () => assert.equal(utils.isString('string'), true))
     );

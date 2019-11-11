@@ -28,7 +28,7 @@ const functorT = () => {
                 const groupSize = 4;
                 const waitGroup = Math.floor(d / groupSize);
                 const waitTime = (250 + (500 * waitGroup)) - (50 * (waitGroup + 1) * (d % groupSize));
-                
+
                 yield waiter(waitTime);
                 eh.happened(`end${d}`);
                 return d;
@@ -116,6 +116,14 @@ describe('Templates', () => {
                 yield functor([waitAndDo(100, () => eh.happened('100')), waitAndDo(5, () => eh.happened('5'))]);
                 yield sync([waitAndDo(100, () => eh.happened('100sync')), waitAndDo(5, () => eh.happened('5sync'))]);
             })).then(() => assert.deepEqual(eh.events, ['5', '100', '100sync', '5sync'])), done);
+        });
+        it('should fail for invalid input', (done) => {
+            eh.clear();
+            quadCore.execute(function* () {
+                yield sync(function* () {
+                    assert.fail('sync should not run single functions');
+                });
+            }).then(assert.fail).catch(() => done());
         });
         it('should return data in proper order', (done) => {
             eh.clear();
